@@ -1,42 +1,56 @@
 <html>
   
-  <head>
-    <style>
-      body {
-      	background-color:#200040;
-      	color: #9300b8;
-      }
-    
-    
-    
-    </style>
-    <title>lapolli club</title>
-    <script type ="text/javascript">
-      function loadFile(filePath) {
-  var result = null;
-  var xmlhttp = new XMLHttpRequest();
-  xmlhttp.open("GET", filePath, false);
-  xmlhttp.send();
-  if (xmlhttp.status==200) {
-    result = xmlhttp.responseText;
-  }
-  return result;
-}
+    <head>
+        <style>
+            body {
+      	        background-color:#200040;
+      	        color: #9300b8;
+            }
+            .highlight {
+                color: #da45ff;
+                font-size: 18px;
+            }
+        </style>
+        
+        <title>lapolli club</title>
+        
 
-var myStuff = loadFile("testing.txt");
-alert(myStuff);
-  </script>
+    </head>
 
-  </head>
-  <form action="/testing.txt">
-  <label for="feeling">Feeling</label>
-  <input type="text" id="feeling" name="feeling"><br><br>
-  <input type="submit" value="Submit">
-</form>
 
-  <body>
-    <h1>
-      lapolli club
-    </h1>
-  </body>
+    <body>
+        <h1>lapolli club</h1>
+        <form>
+            <label for="feeling">Feeling</label>
+            <input type="text" id="feeling" name="feeling"><br><br>
+        </form>
+        <button onclick="present()">Submit</button>
+        
+        <script type ="text/javascript">
+       
+            function loadFile(filePath) {
+                var result = null;
+                var xmlhttp = new XMLHttpRequest();
+                xmlhttp.open("GET", filePath, false);
+                xmlhttp.send();
+                if (xmlhttp.status==200) {
+                    result = xmlhttp.responseText;
+                }
+                return result;
+            }
+            //var myStuff = loadFile("testing.txt");
+            //alert(myStuff);
+          
+            
+            function present () {
+                var userinput = document.getElementById("feeling");
+                userinput.innerHTML = "lol";
+                var entry = document.createElement("P");
+                entry.innerHTML = "----------------------------------- <br></br>" + "<span class=\"highlight\" >" + userinput.value + "</span>" + "<br></br>" + "<b>" + Date() + "</b>";
+                document.body.insertBefore(entry,document.body.childNodes[6])
+                
+            }
+      	
+        </script>
+    </body>
 </html>
