@@ -11,6 +11,21 @@
     
     </style>
     <title>lapolli club</title>
+    <script type ="text/javascript">
+      function loadFile(filePath) {
+  var result = null;
+  var xmlhttp = new XMLHttpRequest();
+  xmlhttp.open("GET", filePath, false);
+  xmlhttp.send();
+  if (xmlhttp.status==200) {
+    result = xmlhttp.responseText;
+  }
+  return result;
+}
+
+var myStuff = loadFile("files/testing.txt");
+alert(myStuff);
+  </script>
 
   </head>
   <form action="/testing.txt">
