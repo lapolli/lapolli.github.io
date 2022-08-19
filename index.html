@@ -1,17 +1,38 @@
 <!DOCTYPE html>
 
 <html>
+	<head>
+		<style>
+			canvas {
+				padding-left: 0;
+				padding-right: 0;
+    			margin-left: auto;
+    			margin-right: auto;
+    			display: block;
+			}
+			h1 {
+				text-align: center;
+			}
+			p {
+				text-align: center;
+			}
+		</style>
+	</head>
     <body>
         <h1>
             Connect 4 muthafucka
         </h1>
-        <canvas id="board" width="350" height="300">
+        <canvas id="board" width="700" height="600">
         </canvas>
 		<p id="stat" style="font-size:100px">
 		</p>
     </body>
     <script>
-        Array.prototype.count = function(filterMethod) {
+
+
+const BOXSIZE = 100
+
+Array.prototype.count = function(filterMethod) {
 	return this.reduce((count, item) => filterMethod(item)? count + 1 : count, 0);
 }
 
@@ -242,7 +263,7 @@ function Board(rows, cols){
 
     this.drawBoard = function() {
         context.fillStyle = "#550d9e";
-        context.fillRect(0,0,500,500);
+        context.fillRect(0,0,700,600);
 
         
         for (var i = 0; i < this.numRows; i++) {
@@ -268,7 +289,7 @@ function Board(rows, cols){
         }
 
         context.beginPath();
-		context.arc((y+.5)*50, (x+.5)*50, 50/2.4, 0, 2*Math.PI, false);
+		context.arc((y+.5)*BOXSIZE, (x+.5)*BOXSIZE, BOXSIZE/2.4, 0, 2*Math.PI, false);
 		context.fill();
 		context.closePath();
 
@@ -284,7 +305,7 @@ function Board(rows, cols){
 		console.log(this.playerTurn);
 
 		if (this.playerTurn) {
-			var col = x / 50 >> 0;
+			var col = x / BOXSIZE >> 0;
 			console.log(col);
 			var row = this.drop(1, col);
 			if (row != null) {
@@ -293,40 +314,46 @@ function Board(rows, cols){
 				this.turns++
 				this.playerTurn = false;
 
+				var that = this;
 
-				var aiCol = alphabeta(this, 5, -10000000000, 10000000000, true)[0];
-				var aiRow = this.drop(0, aiCol);
-
-				this.drawPiece(aiRow, aiCol);
-				this.turns++;
-				this.playerTurn = true;
 				
-				var stat = document.getElementById("stat");
-				if (this.checkWin(0)) {
-					stat.innerHTML = "YOU LOSE LOL";
-					console.log("YOU LOSE");
-					this.playerTurn = false;
-				} else if (this.checkWin(1)) {
-					stat.innerHTML = "YOU WIN";
-					console.log("YOU WIN");
-					this.playerTurn = false;
-				} else if (this.turns == 42) {
-					stat.innerHTML = "ITS A TIE";
-					console.log("TIE");
-					this.playerTurn = false;
-				}
+				//this.aiMove();
+				setTimeout(function() {
+					that.aiMove();
+				}, 300);
 
 				
 
 			}
 
 		}
-
-
-
-
-        
+  
     }
+
+	this.aiMove = function() {
+		var aiCol = alphabeta(this, 5, -10000000000, 10000000000, true)[0];
+		console.log(aiCol, "this col");
+		var aiRow = this.drop(0, aiCol);
+
+		this.drawPiece(aiRow, aiCol);
+		this.turns++;
+		this.playerTurn = true;
+		
+		var stat = document.getElementById("stat");
+		if (this.checkWin(0)) {
+			stat.innerHTML = "YOU LOSE LOL";
+			console.log("YOU LOSE");
+			this.playerTurn = false;
+		} else if (this.checkWin(1)) {
+			stat.innerHTML = "YOU WIN";
+			console.log("YOU WIN");
+			this.playerTurn = false;
+		} else if (this.turns == 42) {
+			stat.innerHTML = "ITS A TIE";
+			console.log("TIE");
+			this.playerTurn = false;
+			}
+	}
 }
 
 
@@ -353,13 +380,13 @@ function alphabeta(board, depth, alpha, beta, maxPlayer) {
 			var boardCopy = new Board(board.numRows, board.numCols);
 			boardCopy.grid = JSON.parse(JSON.stringify(board.grid));
 			//var boardCopy = board.clone();
-			boardCopy.drop(0, i);
+			boardCopy.drop(0, locs[i]);
 			//boardCopy.showBoard()
 			score = alphabeta(boardCopy, depth-1, alpha, beta, false)[1];
 
 			if (score > val) {
 				val = score;
-				col = i
+				col = locs[i]
 			}
 
 			alpha = Math.max(alpha, val);
@@ -379,12 +406,12 @@ function alphabeta(board, depth, alpha, beta, maxPlayer) {
 			var boardCopy = new Board(board.numRows, board.numCols);
 			boardCopy.grid = JSON.parse(JSON.stringify(board.grid));
 			//var boardCopy = board.clone();
-			boardCopy.drop(1, i);
+			boardCopy.drop(1, locs[i]);
 			score = alphabeta(boardCopy, depth-1, alpha, beta, true)[1];
 
 			if (score < val) {
 				val = score;
-				col = i
+				col = locs[i]
 			}
 
 			beta = Math.min(beta, val);
