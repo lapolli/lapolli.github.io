@@ -323,11 +323,11 @@ function Board(rows, cols){
 
 				var that = this;
 
-				
-				//this.aiMove();
-				setTimeout(function() {
-					that.aiMove();
-				}, 300);
+				if (!this.endMove()) {	
+					setTimeout(function() {
+						that.aiMove();
+					}, 300);
+				}
 
 				
 
@@ -345,21 +345,31 @@ function Board(rows, cols){
 		this.drawPiece(aiRow, aiCol);
 		this.turns++;
 		this.playerTurn = true;
+
+		this.endMove();
 		
+		
+	}
+
+	this.endMove = function() {
 		var stat = document.getElementById("stat");
 		if (this.checkWin(0)) {
 			stat.innerHTML = "YOU LOSE LOL";
 			console.log("YOU LOSE");
 			this.playerTurn = false;
+			return true;
 		} else if (this.checkWin(1)) {
 			stat.innerHTML = "YOU WIN";
 			console.log("YOU WIN");
 			this.playerTurn = false;
+			return true;
 		} else if (this.turns == 42) {
 			stat.innerHTML = "ITS A TIE";
 			console.log("TIE");
 			this.playerTurn = false;
-			}
+			return true;
+		}
+
 	}
 }
 
