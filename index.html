@@ -19,6 +19,7 @@
 				color:azure;
 			}
 			body {
+				overflow: hidden;
 				background-image: url("bg.jpeg");
 				background-repeat: repeat;
 			}
@@ -26,7 +27,7 @@
 	</head>
     <body>
         <h1>
-            Connect 4 muthafucka
+            Connect 4
         </h1>
         <canvas id="board" width="700" height="600">
         </canvas>
@@ -134,8 +135,8 @@ function Board(rows, cols){
 		var score = 0;
 
 		for (var i = 0; i < this.numRows; i++) {
-			score += this.scoreLine(player, this.grid[i]) 
-			- this.scoreLine(opp, this.grid[i]) + depth;
+			score += (this.scoreLine(player, this.grid[i]) 
+			- this.scoreLine(opp, this.grid[i]) + depth);
 			//console.log(this.grid[i]);
 		}
 
@@ -144,8 +145,8 @@ function Board(rows, cols){
 			for (var j = 0; j < this.numRows; j++) {
 				line.push(this.grid[j][i]);
 			}
-			score += this.scoreLine(player, line) 
-			- this.scoreLine(opp, line) + depth;
+			score += (this.scoreLine(player, line) 
+			- this.scoreLine(opp, line) + depth);
 			//console.log(line);
 		}
 
@@ -167,14 +168,14 @@ function Board(rows, cols){
 
 			}
 
-			score += this.scoreLine(player, neg1) 
-			- this.scoreLine(opp, neg1) + depth;
-			score += this.scoreLine(player, neg2) 
-			- this.scoreLine(opp, neg2) + depth;
-			score += this.scoreLine(player, pos1) 
-			- this.scoreLine(opp, pos1) + depth;
-			score += this.scoreLine(player, pos2) 
-			- this.scoreLine(opp, pos2) + depth;
+			score += (this.scoreLine(player, neg1) 
+			- this.scoreLine(opp, neg1) + depth);
+			score += (this.scoreLine(player, neg2) 
+			- this.scoreLine(opp, neg2) + depth);
+			score += (this.scoreLine(player, pos1) 
+			- this.scoreLine(opp, pos1) + depth);
+			score += (this.scoreLine(player, pos2) 
+			- this.scoreLine(opp, pos2) + depth);
 
 			/*console.log(neg1);
 			console.log(neg2);
@@ -230,7 +231,7 @@ function Board(rows, cols){
 				}
 			}
 			if (longestSecond < length - 1) {
-				if (line[longestSecond - 1] == null) {
+				if (line[longestSecond + 1] == null) {
 					longest++;
 				}
 			}
@@ -337,7 +338,7 @@ function Board(rows, cols){
     }
 
 	this.aiMove = function() {
-		var aiCol = alphabeta(this, 5, -10000000000, 10000000000, true)[0];
+		var aiCol = alphabeta(this, 5, -100000000000, 100000000000, true)[0];
 		console.log(aiCol, "this col");
 		var aiRow = this.drop(0, aiCol);
 
@@ -365,10 +366,10 @@ function Board(rows, cols){
 
 function alphabeta(board, depth, alpha, beta, maxPlayer) {
 	//console.log("fuc")
-	locs = board.validLocations();
-	locsLength = locs.length;
-	aiWin = board.checkWin(0);
-	playerWin = board.checkWin(1);
+	let locs = board.validLocations();
+	let locsLength = locs.length;
+	let aiWin = board.checkWin(0);
+	let playerWin = board.checkWin(1);
 	var empty = 0;
 	for (var i = 0; i < board.numRows; i++) {
 		empty += board.grid[i].count(x => x == null);
