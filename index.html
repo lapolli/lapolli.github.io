@@ -29,7 +29,7 @@
         <h1>
             Connect 4
         </h1>
-        <canvas id="board" width="700" height="600">
+        <canvas id="board" width="770" height="660">
         </canvas>
 		<p id="stat" style="font-size:100px">
 		</p>
@@ -37,8 +37,10 @@
     <script>
 
 
-const BOXSIZE = 100
-
+const W = 770;
+const H = 660;
+const BOXSIZE = 110;
+	    
 Array.prototype.count = function(filterMethod) {
 	return this.reduce((count, item) => filterMethod(item)? count + 1 : count, 0);
 }
@@ -270,7 +272,7 @@ function Board(rows, cols){
 
     this.drawBoard = function() {
         context.fillStyle = "#550d9e";
-        context.fillRect(0,0,700,600);
+        context.fillRect(0,0,W,H);
 
         
         for (var i = 0; i < this.numRows; i++) {
