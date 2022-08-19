@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+
+<html>
+    <body>
+        <h1>
+            Connect 4 muthafucka
+        </h1>
+        <canvas id="board" width="350" height="300">
+        </canvas>
+		<p id="stat" style="font-size:100px">
+		</p>
+    </body>
+    <script>
+        Array.prototype.count = function(filterMethod) {
+	return this.reduce((count, item) => filterMethod(item)? count + 1 : count, 0);
+}
+
+
+
+function Board(rows, cols){
+	this.numRows = rows;
+	this.numCols = cols;
+	this.playerTurn = true;
+	this.turns = 0;
+	this.grid = [];
+
+	this.initializeBoard = function() {
+		for (var i = 0; i < this.numRows; i++) {
+			this.grid[i] = [];
+			for (var j = 0; j < this.numCols; j++) {
+				this.grid[i][j] = null;
+			}
+		}
+	}
+
+	this.showBoard = function() {
+		for (var i = 0; i < this.numRows; i++) {
+			var line = ' ';
+			for (var j = 0; j < this.numCols; j++) {
+				if (this.grid[i][j] == null) {
+					line += 'X' + ' ';	
+				} else {
+					line += this.grid[i][j] + ' ';
+				}
+			}
+			console.log(line);
+		}
+
+	}
+
+	this.checkWin = function(player) {
+		for (var i = 0; i < this.numRows; i++) {
+			for (var j = 0; j < this.numCols - 3; j++) {
+				if (this.grid[i][j] == player && this.grid[i][j+1] == player &&
+					this.grid[i][j+2] == player && this.grid[i][j+3] == player) {
+						return true;
+					}
+			}
+		}
+
+		for (var i = 0; i < this.numRows - 3; i++) {
+			for (var j = 0; j < this.numCols; j++) {
+				//console.log(this.grid[i][j], this.grid[i+1][j], this.grid[i+2][j], this.grid[i+3][j])
+				//console.log(this.grid[i][j] == player)
+				if (this.grid[i][j] == player && this.grid[i+1][j] == player &&
+					this.grid[i+2][j] == player && this.grid[i+3][j] == player) {
+						//console.log("hey")
+						return true;
+					}
+			}
+		}
+
+		for (var i = 0; i < this.numRows - 3; i++) {
+			for (var j = 0; j < this.numCols-3; j++) {
+				if (this.grid[i][j] == player && this.grid[i+1][j+1] == player &&
+					this.grid[i+2][j+2] == player && this.grid[i+3][j+3] == player) {
+						return true;
+					}
+			}
+		}
+
+		for (var i = 3; i < this.numRows; i++) {
+			for (var j = 0; j < this.numCols; j++) {
+				if (this.grid[i][j] == player && this.grid[i-1][j+1] == player &&
+					this.grid[i-2][j+2] == player && this.grid[i-3][j+3] == player) {
+						return true;
+					}
+			}
+		}
+
+
+	}
+
+	this.drop = function(player, col) {
+		for (var i = this.numRows - 1; i >= 0; i--) {
+			if (this.grid[i][col] == null) {
+				this.grid[i][col] = player;
+				return i;
+			}
+		}
+		
+		return;
+	}
+
+	this.scoreBoard = function(player, depth) {
+		var opp = Math.abs(player - 1);
+		var score = 0;
+
+		for (var i = 0; i < this.numRows; i++) {
+			score += this.scoreLine(player, this.grid[i]) 
+			- this.scoreLine(opp, this.grid[i]) + depth;
+			//console.log(this.grid[i]);
+		}
+
+		for (var i = 0; i < this.numCols; i++) {
+			line = [];
+			for (var j = 0; j < this.numRows; j++) {
+				line.push(this.grid[j][i]);
+			}
+			score += this.scoreLine(player, line) 
+			- this.scoreLine(opp, line) + depth;
+			//console.log(line);
+		}
+
+		for (var i = 0; i < this.numRows - 3; i++) {
+			var neg1 = [];
+			var neg2 = [];
+			var pos1 = [];
+			var pos2 = [];
+
+			for (var j = 0; j < this.numCols; j++) {
+				if (i + j < 6) {
+					if (j < 6) {
+						neg2.push(this.grid[j][i+j+1]);
+                    	pos2.push(this.grid[j][6-i-j-1]);
+					}
+					neg1.push(this.grid[i+j][j]);
+                    pos1.push(this.grid[i+j][6-j]);
+				}
+
+			}
+
+			score += this.scoreLine(player, neg1) 
+			- this.scoreLine(opp, neg1) + depth;
+			score += this.scoreLine(player, neg2) 
+			- this.scoreLine(opp, neg2) + depth;
+			score += this.scoreLine(player, pos1) 
+			- this.scoreLine(opp, pos1) + depth;
+			score += this.scoreLine(player, pos2) 
+			- this.scoreLine(opp, pos2) + depth;
+
+			/*console.log(neg1);
+			console.log(neg2);
+			console.log(pos1);
+			console.log(pos2);*/
+		}
+
+		return score;
+
+	}
+
+	this.scoreLine = function(player, line) {
+		var opp = Math.abs(player - 1);
+		var score = 0;
+		var first = null;
+		var second = null;
+		var longestFirst = null;
+		var longestSecond = null;
+		var longest = 0;
+		var length = line.length;
+
+		for (var i = 0; i < length; i++) {
+			if (first == null) {
+				if (line[i] == player) {
+					first = i;
+				}
+			} else {
+				if (line[i] == player) {
+					second = i;
+				}
+			}
+
+			if (line[i] == opp || i == length - 1) {
+				if (first != null && second != null) {
+					if (second - first + 1 > longest) {
+						longestFirst = first;
+						longestSecond = second;
+						longest = longestSecond - longestFirst + 1;
+					}
+				}
+				first = null;
+				second = null;
+			}
+
+
+		}
+
+		if (longest != 0) {
+			//console.log("aaa");
+			if (longestFirst > 0) {
+				if (line[longestFirst - 1] == null) {
+					longest++;
+				}
+			}
+			if (longestSecond < length - 1) {
+				if (line[longestSecond - 1] == null) {
+					longest++;
+				}
+			}
+
+			playerCounters = line.slice(longestFirst,longestSecond + 1).count(x => x==player);
+			noCounters = line.slice(longestFirst,longestSecond + 1).count(x => x==null);
+
+			if (playerCounters == 2) {
+				score = 2 * longest;
+			} else if (playerCounters == 3) {
+				score = 5 * longest;	
+			} else if (playerCounters >= 4) {
+				if (noCounters == 0) {
+					//console.log("win");
+					score = 1000000;
+				} else {
+					score = 10 * longest;
+				}
+			}
+
+
+		}
+		return score;	
+
+	}
+
+	this.validLocations = function() {
+		locs = [];
+		for (var i = 0; i < this.numCols; i++) {
+			if (this.grid[0][i] == null) {
+				locs.push(i);
+			}
+		}
+		return locs;
+	}
+
+    this.drawBoard = function() {
+        context.fillStyle = "#550d9e";
+        context.fillRect(0,0,500,500);
+
+        
+        for (var i = 0; i < this.numRows; i++) {
+            console.log("aaa")
+            for (var j = 0; j < this.numCols; j++) {
+                console.log('aa')
+                this.drawPiece(i,j);
+            }
+        }
+
+
+    }
+
+    this.drawPiece = function(x,y) {
+		console.log(x, y);
+        if (this.grid[x][y] == null) {
+            console.log("help");
+            context.fillStyle = "#a461e8";
+        } else if (this.grid[x][y] == 0) {
+            context.fillStyle = "#e861a5";
+        } else {
+            context.fillStyle = "#6195e8";
+        }
+
+        context.beginPath();
+		context.arc((y+.5)*50, (x+.5)*50, 50/2.4, 0, 2*Math.PI, false);
+		context.fill();
+		context.closePath();
+
+
+    }
+
+    this.click = function(event) {
+		console.log(event, "aaa");
+
+		var rect = canvas.getBoundingClientRect()
+		var x = event.clientX - rect.left;
+
+		console.log(this.playerTurn);
+
+		if (this.playerTurn) {
+			var col = x / 50 >> 0;
+			console.log(col);
+			var row = this.drop(1, col);
+			if (row != null) {
+				console.log("llll");
+				this.drawPiece(row, col)
+				this.turns++
+				this.playerTurn = false;
+
+
+				var aiCol = alphabeta(this, 5, -10000000000, 10000000000, true)[0];
+				var aiRow = this.drop(0, aiCol);
+
+				this.drawPiece(aiRow, aiCol);
+				this.turns++;
+				this.playerTurn = true;
+				
+				var stat = document.getElementById("stat");
+				if (this.checkWin(0)) {
+					stat.innerHTML = "YOU LOSE LOL";
+					console.log("YOU LOSE");
+					this.playerTurn = false;
+				} else if (this.checkWin(1)) {
+					stat.innerHTML = "YOU WIN";
+					console.log("YOU WIN");
+					this.playerTurn = false;
+				} else if (this.turns == 42) {
+					stat.innerHTML = "ITS A TIE";
+					console.log("TIE");
+					this.playerTurn = false;
+				}
+
+				
+
+			}
+
+		}
+
+
+
+
+        
+    }
+}
+
+
+function alphabeta(board, depth, alpha, beta, maxPlayer) {
+	//console.log("fuc")
+	locs = board.validLocations();
+	locsLength = locs.length;
+	aiWin = board.checkWin(0);
+	playerWin = board.checkWin(1);
+	var empty = 0;
+	for (var i = 0; i < board.numRows; i++) {
+		empty += board.grid[i].count(x => x == null);
+	}
+	//console.log(depth, aiWin, playerWin, empty);
+	if (depth == 0 || aiWin || playerWin || empty == 0) {
+		return [null, board.scoreBoard(0, depth)]
+	}
+
+	if (maxPlayer) {
+		var val = -Infinity;
+		var col = locs[0];
+
+		for (var i = 0; i < locsLength; i++) {
+			var boardCopy = new Board(board.numRows, board.numCols);
+			boardCopy.grid = JSON.parse(JSON.stringify(board.grid));
+			//var boardCopy = board.clone();
+			boardCopy.drop(0, i);
+			//boardCopy.showBoard()
+			score = alphabeta(boardCopy, depth-1, alpha, beta, false)[1];
+
+			if (score > val) {
+				val = score;
+				col = i
+			}
+
+			alpha = Math.max(alpha, val);
+
+			if (beta <= alpha) {
+				break;
+			}
+		}
+
+		return [col, val];
+
+	} else {
+		var val = Infinity;
+		var col = locs[0];
+
+		for (var i = 0; i < locsLength; i++) {
+			var boardCopy = new Board(board.numRows, board.numCols);
+			boardCopy.grid = JSON.parse(JSON.stringify(board.grid));
+			//var boardCopy = board.clone();
+			boardCopy.drop(1, i);
+			score = alphabeta(boardCopy, depth-1, alpha, beta, true)[1];
+
+			if (score < val) {
+				val = score;
+				col = i
+			}
+
+			beta = Math.min(beta, val);
+
+			if (beta <= alpha) {
+				break;
+			}
+		}
+
+		return [col, val];
+	}
+
+
+}
+
+function getCanvas(board) {
+    canvas = document.getElementById("board");
+    context = canvas.getContext("2d");
+    canvas.addEventListener("click", sendClick)
+
+}
+
+function getCursorPosition(canvas, event) {
+    const rect = canvas.getBoundingClientRect()
+    const x = event.clientX - rect.left
+    const y = event.clientY - rect.top
+    console.log("x: " + x + " y: " + y)
+	return [x,y]
+}
+
+function sendClick(e) {
+	B.click(e);
+}
+
+var B = new Board(6,7)
+B.initializeBoard();
+
+getCanvas(B);
+B.drawBoard();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*B.drop(0,0);
+B.drop(1,1);
+B.drop(1,2);
+B.drop(1,2);
+B.drop(1,3);
+B.drop(1,3);
+B.drop(1,3);
+B.drop(0,1);
+B.drop(0,2);
+//B.drop(0,3);
+//B.showBoard();
+B.showBoard();
+console.log(B.checkWin(0));
+console.log(B.scoreBoard(0,1));
+console.log(alphabeta(B, 3, -10000000000, 10000000000, true));*/
+
+/*
+while (true) {
+
+    var gridString = '';
+    for (var i = 0; i < B.numRows; i++) {
+        for (var j = 0; j < B.numCols; j++) {
+            if (B.grid[i][j] == null) {
+                gridString += 'X' + ' ';	
+            } else {
+                gridString += B.grid[i][j] + ' ';
+            }
+        }
+        gridString += "<br>";
+    }
+
+    var turns = 0;
+
+    document.getElementById("board").innerHTML = gridString;
+
+	if (B.checkWin(1)) {
+		console.log("You win!");
+		break;
+	} else if (B.checkWin(0)) {
+		console.log("You lose!");
+		break;
+	} else if (turns == 42) {
+		console.log("It's a tie!");
+		break;
+	}
+
+	//var playerCol = parseInt(prompt("Which column? (1-7): ")) - 1;
+
+	//B.drop(1,  playerCol);
+	
+	turns++;
+
+	if (B.checkWin(1)) {
+		console.log("You win!");
+		break;
+	} else if (B.checkWin(0)) {
+		console.log("You lose!");
+		break;
+	} else if (turns == 42) {
+		console.log("It's a tie!");
+		break;
+	}
+
+	B.drop(0, alphabeta(B, 3, -10000000000, 10000000000, true)[0]);
+	turns++;
+
+}
+*/
+/*while (true) {
+	var turns = 0;
+
+	B.showBoard();
+
+	if (B.checkWin(1)) {
+		console.log("You win!");
+		break;
+	} else if (B.checkWin(0)) {
+		console.log("You lose!");
+		break;
+	} else if (turns == 42) {
+		console.log("It's a tie!");
+		break;
+	}
+
+	var playerCol = parseInt(prompt("Which column? (1-7): ")) - 1;
+
+	B.drop(1,  playerCol);
+	
+	turns++;
+
+	if (B.checkWin(1)) {
+		console.log("You win!");
+		break;
+	} else if (B.checkWin(0)) {
+		console.log("You lose!");
+		break;
+	} else if (turns == 42) {
+		console.log("It's a tie!");
+		break;
+	}
+
+	B.drop(0, alphabeta(B, 3, -10000000000, 10000000000, true)[0]);
+	turns++;
+
+}*/
+
+/*function changeFrom2(position){
+	for (var x = 2; x < 6; x++){
+		for (var y = 2; y < 6; y++){
+			position[x][y] = (position[x][y] == 2) ? -1 : position[x][y];
+		}
+	}
+	return position;
+}
+
+var p = [[1, 2, 1, 2, 1, 2, 1], [1, 2, 2, 1, 1, 1, 2], [2, 1, 2, 2, 2, 1, 1], [1, 2, 1, 2, 2, 2, 2], [2, 2, 1, 2, 1, 1, 1], [1, 1, 2, 1, 1, 2, 1]]
+
+console.log(changeFrom2(p))*/
+    </script>
+
+
+</html>
