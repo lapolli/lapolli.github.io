@@ -326,7 +326,7 @@ function Board(rows, cols){
 				if (!this.endMove()) {	
 					setTimeout(function() {
 						that.aiMove();
-					}, 300);
+					}, 100);
 				}
 
 				
@@ -338,7 +338,7 @@ function Board(rows, cols){
     }
 
 	this.aiMove = function() {
-		var aiCol = alphabeta(this, 5, -100000000000, 100000000000, true)[0];
+		var aiCol = alphabeta(this, 6, -100000000000, 100000000000, true)[0];
 		console.log(aiCol, "this col");
 		var aiRow = this.drop(0, aiCol);
 
